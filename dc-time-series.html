@@ -1,0 +1,69 @@
+<!--## This dc-pie-chart lesson (from Code Institute Full-Stack Diploma course). Transcription from lessons, included in comments sections in the code.-->
+<!--The external data source that we've been using over the last couple of Units also contains dates of when purchases were made. A line graph nicely represents changes over time. So let's try one now. So the first thing we do is we create our div and let's give it a heading called Total Spend Per Month. We have our queue() function in place. We have our script imports in place. So let's give our div a id which is spend-per-month. Okay, our make graph is emptied out all that's there is our ndx r cross filter that uses a transaction data postions of parameter now we want to make sure that the data in particular the date format is formatted in a way that can be represented by cross filter DC and d3 and you can ensure this by using a format function that that comes with d3 so you can specify the date format whether it's US European and so on and what you do then is we iterate through each of the date entries and format the data entry as per the specification on line 36 and this you might recognize the function D that I study the function with D as a parameter from an earlier unit when we first started working d3 D represents a datum in our data set so what we're doing here so all we're doing here is we're parsing the date entries and formatting them then we create our dimension and we're working with date and spend across those dates and we're going to examine and extract the minimum date and the maximum dates that are available on our data set so we get the oldest date by using bottom data and bottom and the newest age are the most recent date by using datum top so these will provide us with our domain and once these variables are in place the rest should look quite similar to the steps required to create pie charts and bar charts but instead of a radius in this case we set a width and a height we also set some margins for some breathing space around the graph itself and remember these top right and bottom they're relative to the parent viewport to the div itself not the entire browser screen okay we access our dimension which is datum we group the group by total spend for a month and transition duration as well the set again let's set this for 500 milliseconds and just a reminder all of these this is a chaining of functions all from line charts you can see the dot in front of them so why the common mistakes is to put a semicolon out after say width or height or dimension these are all changed together until you reach the end of the chain and only then should you put a semicolon to indicate the end of the functional chain our time scale uses our min data and our max date and we set an x-axis label from per month and we use the y-axis we set the number of ticks I need four and then we call render all you now let's take a look at it clicking open we can see our line graph and there are our month intervals and you can also segment as well using what's called a brush you can see it here that's available by default automatically.-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>D3 and Scalable Vector Graphics</title>
+
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/dc/2.1.8/dc.min.css"/>
+    <style>
+        div {
+            clear: left;
+        }
+    </style>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.12/crossfilter.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dc/2.1.8/dc.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/queue-async/1.0.7/queue.min.js"></script>
+
+</head>
+<body>
+    <h1>Data Visualisation</h1>
+
+    <h2>DC LineChart</h2>
+
+    <div>
+        <h3>Total Spend Per Month</h3>
+        <div id="chart-here"></div>
+    </div>
+
+    <script>
+    queue()
+        .defer(d3.json, "data/transactions.json")
+        .await(makeGraphs);
+
+    function makeGraphs(error, transactionsData) {
+        var ndx = crossfilter(transactionsData);
+
+        var parseDate = d3.time.format("%d/%m/%Y").parse;
+        transactionsData.forEach(function(d){
+            d.date = parseDate(d.date);
+        });
+
+        var date_dim = ndx.dimension(dc.pluck('date'));
+        var total_spend_per_date = date_dim.group().reduceSum(dc.pluck('spend'));
+
+        var minDate = date_dim.bottom(1)[0].date;
+        var maxDate = date_dim.top(1)[0].date;
+
+        dc.lineChart("#chart-here")
+            .width(1000)
+            .height(300)
+            .margins({top: 10, right: 50, bottom: 30, left: 50})
+            .dimension(date_dim)
+            .group(total_spend_per_date)
+            .transitionDuration(500)
+            .x(d3.time.scale().domain([minDate,maxDate]))
+            .xAxisLabel("Month")
+            .yAxis().ticks(4);
+
+        dc.renderAll();
+    }
+    </script>
+</body>
+</html>
